@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-
+import './App.css';
 const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = 'https://v3.football.api-sports.io/';
 
@@ -59,10 +59,33 @@ function App() {
         {!loading && !error && fixtures.length > 0 && (
           <>
             <p>Found {searchHits} matches</p>
-            <ul>
+            <ul id="matches-list">
               {fixtures.map((item) => (
                 <li key={item.fixture?.id ?? item.fixture?.timestamp}>
-                  {item.teams?.home?.name} vs {item.teams?.away?.name}
+
+                  <div id="teams-logos">
+                    <img src={item.teams?.home?.logo} alt={item.teams?.home?.name} />
+                    <img src={item.teams?.away?.logo} alt={item.teams?.away?.name} />
+                  </div>
+
+                  <div id="teams"> 
+                    <p>{item.teams?.home?.name}</p>
+                    <p>{item.teams?.away?.name}</p> 
+                  </div>
+
+                  <div id="goals">
+                    <p>{item.goals?.home}</p>
+                    <p>{item.goals?.away}</p>
+                  </div>
+
+                  <div>
+                    <p>{item.fixture?.status?.long}</p>
+                    <p>{item.status?.elapsed || 'Unknown elapsed time'}</p>
+                  </div>
+                  <div>
+                    <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
+                  </div>
+
                 </li>
               ))}
             </ul>
