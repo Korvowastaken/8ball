@@ -50,6 +50,8 @@ function App() {
     return () => controller.abort();
   }, []);
 
+  console.log(fixtures)
+
   return (
     <>
       <main>
@@ -78,11 +80,11 @@ function App() {
                     <p>{item.goals?.away}</p>
                   </div>
 
-                  <div>
+                  <div id="status">
                     <p>{item.fixture?.status?.long}</p>
-                    <p>{item.status?.elapsed || 'Unknown elapsed time'}</p>
+                    <p>{item.fixture?.status?.elapsed || 'Unknown elapsed time'} ' </p>
                   </div>
-                  <div>
+                  <div id="venue">
                     <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
                   </div>
 
