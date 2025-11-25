@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = 'https://v3.football.api-sports.io/';
 
 function App() {
-  // const [data, setData] = useState(null);
   const [searchHits, setSearchHits] = useState(0);
   const [fixtures, setFixtures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
 
   useEffect(() => {
     if (!API_KEY) {
@@ -50,7 +50,7 @@ function App() {
     return () => controller.abort();
   }, []);
 
-  console.log(fixtures)
+  // console.log(fixtures)
 
   return (
     <>
@@ -62,34 +62,52 @@ function App() {
           <>
             <p>Found {searchHits} matches</p>
             <ul id="matches-list">
-              {fixtures.map((item) => (
-                <li key={item.fixture?.id ?? item.fixture?.timestamp}>
+              {(() => {
+                let previousLeague = '';
+                return fixtures.map((item) => {
+                  const currentLeague = item.league?.name || 'Unknown League';
+                  const isNewLeague = currentLeague !== previousLeague;
+                  if (isNewLeague) {
+                    previousLeague = currentLeague;
+                  }
+                  
+                  return (
+                    <React.Fragment key={`${item.fixture?.id ?? item.fixture?.timestamp}-fragment`}>
+                      {isNewLeague && (
+                        <li key={`league-${currentLeague}`} className="league-header">
+                          <h2>{currentLeague}</h2>
+                        </li>
+                      )}
+                      <li key={item.fixture?.id ?? item.fixture?.timestamp}>
 
-                  <div id="teams-logos">
-                    <img src={item.teams?.home?.logo} alt={item.teams?.home?.name} />
-                    <img src={item.teams?.away?.logo} alt={item.teams?.away?.name} />
-                  </div>
+                    <div id="teams-logos">
+                      <img src={item.teams?.home?.logo} alt={item.teams?.home?.name} />
+                      <img src={item.teams?.away?.logo} alt={item.teams?.away?.name} />
+                    </div>
 
-                  <div id="teams"> 
-                    <p>{item.teams?.home?.name}</p>
-                    <p>{item.teams?.away?.name}</p> 
-                  </div>
+                    <div id="teams"> 
+                      <p>{item.teams?.home?.name}</p>
+                      <p>{item.teams?.away?.name}</p> 
+                    </div>
 
-                  <div id="goals">
-                    <p>{item.goals?.home}</p>
-                    <p>{item.goals?.away}</p>
-                  </div>
+                    <div id="goals">
+                      <p>{item.goals?.home}</p>
+                      <p>{item.goals?.away}</p>
+                    </div>
 
-                  <div id="status">
-                    <p>{item.fixture?.status?.long}</p>
-                    <p>{item.fixture?.status?.elapsed || 'Unknown elapsed time'} ' </p>
-                  </div>
-                  <div id="venue">
-                    <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
-                  </div>
+                    <div id="status">
+                      <p>{item.fixture?.status?.short}</p>
+                      <p>{item.fixture?.status?.elapsed || 'Unknown elapsed time'} ' </p>
+                    </div>
+                    <div id="venue">
+                      <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
+                    </div>
 
-                </li>
-              ))}
+                      </li>
+                    </React.Fragment>
+                  );
+                });
+              })()}
             </ul>
           </>
         )}
