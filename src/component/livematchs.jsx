@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+const API_KEY = import.meta.env.VITE_API_KEY;
+const BASE_URL = 'https://v3.football.api-sports.io/';
 
 export default function LiveMatches() {
 
@@ -6,6 +8,47 @@ export default function LiveMatches() {
     const [fixtures, setFixtures] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+
+        if (!API_KEY) {
+          setError('Missing API key');
+          setLoading(false);
+          return;
+        }
+    
+        const controller = new AbortController();
+    
+        fetch(`${BASE_URL}fixtures?live=all`, {
+          method: 'GET',
+          headers: {
+            'x-apisports-key': API_KEY,
+          },
+          signal: controller.signal,
+        })
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(`Request failed with ${res.status}`);
+            }
+            return res.json();
+          })
+    
+    
+          .then((data) => {
+            setFixtures(Array.isArray(data?.response) ? data.response : []);
+            setSearchHits(data?.results ?? 0);
+          })
+    
+    
+          .catch((err) => {
+            if (err.name !== 'AbortError') {
+              setError(err.message || 'Failed to load fixtures.');
+            }
+          })
+          .finally(() => setLoading(false));
+    
+        return () => controller.abort();
+      }, []);
 
 
   return (
