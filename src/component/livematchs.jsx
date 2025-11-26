@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import '../styles/live.css'
+
+
+
 const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = 'https://v3.football.api-sports.io/';
 
