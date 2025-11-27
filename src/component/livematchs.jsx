@@ -98,10 +98,8 @@ export default function LiveMatches() {
                     </div>
 
                     <div id="status">
-                      <p>{item.fixture?.status?.short}</p>
+                      {/* <p>{item.fixture?.status?.short}</p> */}
                       <p>{item.fixture?.status?.elapsed || 'Unknown elapsed time'} ' </p>
-                    </div>
-                    <div id="venue">
                       <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
                     </div>
 
