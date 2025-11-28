@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react'
 import '../styles/live.css'
 
 
-
-const API_KEY = import.meta.env.VITE_API_KEY;
-const BASE_URL = 'https://v3.football.api-sports.io/';
+const API_KEY = import.meta.env.VITE_API_KEY2;
+const BASE_URL = '/api/football-data';
 
 export default function LiveMatches() {
 
@@ -23,10 +22,10 @@ export default function LiveMatches() {
     
         const controller = new AbortController();
     
-        fetch(`${BASE_URL}fixtures?live=all`, {
+        fetch(`${BASE_URL}matches?status=LIVE`, {
           method: 'GET',
           headers: {
-            'x-apisports-key': API_KEY,
+            'X-Auth-Token': API_KEY,
           },
           signal: controller.signal,
         })
@@ -39,8 +38,10 @@ export default function LiveMatches() {
     
     
           .then((data) => {
-            setFixtures(Array.isArray(data?.response) ? data.response : []);
-            setSearchHits(data?.results ?? 0);
+            const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
+            setFixtures(fixturesData);
+            setSearchHits(fixturesData.length);
+        console.log('Fetched fixtures:', fixturesData); 
           })
     
     
@@ -54,6 +55,10 @@ export default function LiveMatches() {
         return () => controller.abort();
       }, []);
 
+    useEffect(()=>{
+      
+    },[])
+
 
   return (
     <main>
@@ -64,51 +69,50 @@ export default function LiveMatches() {
           <>
             <p>Found {searchHits} matches</p>
             <ul id="matches-list">
-              {(() => {
-                let previousLeague = '';
-                return fixtures.map((item) => {
-                  const currentLeague = item.league?.name || 'Unknown League';
+            {(() => {
+              let previousLeague = '';
+              return fixtures.map((item) => {
+                  const currentLeague = item.competition?.name || 'Unknown League';
                   const isNewLeague = currentLeague !== previousLeague;
                   if (isNewLeague) {
                     previousLeague = currentLeague;
                   }
-                  
+                        
                   return (
-                    <React.Fragment key={`${item.fixture?.id ?? item.fixture?.timestamp}-fragment`}>
-                      {isNewLeague && (
-                        <li key={`league-${currentLeague}`} className="league-header">
-                          <h2>{currentLeague}</h2>
-                        </li>
-                      )}
-                      <li key={item.fixture?.id ?? item.fixture?.timestamp}>
-
-                    <div id="teams-logos">
-                      <img src={item.teams?.home?.logo} alt={item.teams?.home?.name} />
-                      <img src={item.teams?.away?.logo} alt={item.teams?.away?.name} />
-                    </div>
-
-                    <div id="teams"> 
-                      <p>{item.teams?.home?.name}</p>
-                      <p>{item.teams?.away?.name}</p> 
-                    </div>
-
-                    <div id="goals">
-                      <p>{item.goals?.home}</p>
-                      <p>{item.goals?.away}</p>
-                    </div>
-
-                    <div id="status">
-                      {/* <p>{item.fixture?.status?.short}</p> */}
-                      <p>{item.fixture?.status?.elapsed || 'Unknown elapsed time'} ' </p>
-                      <p>{item.fixture?.venue?.name || 'Unknown venue'}</p>
-                    </div>
-
+                  <React.Fragment key={`${item.id ?? item.utcDate}-fragment`}>
+                    {isNewLeague && (
+                      <li key={`league-${currentLeague}`} className="league-header">
+                        <h2>{currentLeague}</h2>
                       </li>
-                    </React.Fragment>
-                  );
-                });
-              })()}
-            </ul>
+                    )}
+                    
+                    <li key={item.id ?? item.utcDate}>
+                      <div id="teams-logos">
+                        <img src={item.homeTeam?.crest} alt={item.homeTeam?.name} />
+                        <img src={item.awayTeam?.crest} alt={item.awayTeam?.name} />
+                      </div>
+
+                      <div id="teams"> 
+                        <p>{item.homeTeam?.name}</p>
+                        <p>{item.awayTeam?.name}</p> 
+                      </div>
+
+                      <div id="goals">
+                        <p>{item.score?.fullTime?.home ?? item.score?.halfTime?.home ?? '-'}</p>
+                        <p>{item.score?.fullTime?.away ?? item.score?.halfTime?.away ?? '-'}</p>
+                      </div>
+
+                      <div id="status">
+                        <p>{item.status || 'TBD'}</p>
+                        <p>{item.utcDate ? new Date(item.utcDate).toLocaleTimeString() : 'TBD'}</p>
+                        <p>{item.venue || 'Unknown venue'}</p>
+                      </div>
+                    </li>
+                  </React.Fragment>
+                );
+              });
+            })()}
+          </ul>
           </>
         )}
       </main>    
