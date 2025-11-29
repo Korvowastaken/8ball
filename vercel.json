@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/football-data/[...path].js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs20.x@1.0.0"
     }
   },
   "rewrites": [
