@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom';
 import { addDays, format } from 'date-fns';
 
 
@@ -6,6 +7,7 @@ const API_KEY = import.meta.env.VITE_API_KEY2;
 const BASE_URL = '/api/football-data';
 
 function fixture() {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() =>
     new Date().toISOString().split('T')[0]
   );
@@ -16,8 +18,10 @@ function fixture() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    searchfixture();
+  }, []);
 
-  
   function getNextDay(dateString) {
     const date = new Date(dateString);
     const nextDay = addDays(date, 1);
@@ -41,11 +45,7 @@ function fixture() {
     const controller = new AbortController();
 
     // Format date for API (YYYY-MM-DD)
-    const url = `${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`;
-    console.log('🔵 Client: Fetching from:', url);
-    console.log('🔵 Client: API Key present:', !!API_KEY);
-    console.log('🔵 Client: Date range:', selectedDate, 'to', nextDate);
-    
+    const url = `${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`;    
     fetch(url, {    
       method: 'GET',
       headers: {
@@ -63,9 +63,7 @@ function fixture() {
         return res.json();
       })
       .then((data) => {
-        console.log('🟢 Client: Received data:', data);
         const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
-        console.log('🟢 Client: Processed fixtures:', fixturesData.length, 'matches');
         setFixtures(fixturesData);
       })
       .catch((err) => {
