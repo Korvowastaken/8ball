@@ -41,27 +41,36 @@ function fixture() {
     const controller = new AbortController();
 
     // Format date for API (YYYY-MM-DD)
-    const formattedDate = selectedDate;
-    fetch(`${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`, {    
+    const url = `${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`;
+    console.log('🔵 Client: Fetching from:', url);
+    console.log('🔵 Client: API Key present:', !!API_KEY);
+    console.log('🔵 Client: Date range:', selectedDate, 'to', nextDate);
+    
+    fetch(url, {    
       method: 'GET',
       headers: {
         'X-Auth-Token': API_KEY,
       },
       signal: controller.signal,
     })
-      .then((res) => {
+      .then(async (res) => {
+        console.log('🔵 Client: Response status:', res.status, res.statusText);
         if (!res.ok) {
-          throw new Error(`Request failed with ${res.status}`);
+          const errorText = await res.text();
+          console.error('🔴 Client: Error response:', errorText);
+          throw new Error(`Request failed with ${res.status}: ${errorText}`);
         }
         return res.json();
       })
       .then((data) => {
+        console.log('🟢 Client: Received data:', data);
         const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
+        console.log('🟢 Client: Processed fixtures:', fixturesData.length, 'matches');
         setFixtures(fixturesData);
-        console.log('Fetched fixtures:', fixturesData);
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
+          console.error('🔴 Client: Fetch error:', err);
           setError(err.message || 'Failed to load fixtures.');
         }
       })

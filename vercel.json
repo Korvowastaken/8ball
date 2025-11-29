@@ -1,2 +1,14 @@
-{}
+{
+  "functions": {
+    "api/football-data/[...path].js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/football-data/:path*",
+      "destination": "/api/football-data/:path*"
+    }
+  ]
+}
 

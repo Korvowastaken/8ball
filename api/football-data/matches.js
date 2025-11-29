@@ -7,36 +7,19 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Get the path from the request
-  // In Vercel, catch-all routes: /api/football-data/matches -> path = ['matches']
-  const { path } = req.query;
-  const apiPath = Array.isArray(path) ? path.join('/') : (path || '');
-  
-  // Get the API key from the request headers (case-insensitive)
+  // Get the API key from the request headers
   const apiKey = req.headers['x-auth-token'] || req.headers['X-Auth-Token'];
   
   if (!apiKey) {
-    console.error('Missing API key. Headers:', Object.keys(req.headers));
     return res.status(401).json({ error: 'Missing X-Auth-Token header' });
   }
 
-  // Get query string from URL (excluding the 'path' parameter)
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const queryParams = new URLSearchParams();
-  url.searchParams.forEach((value, key) => {
-    if (key !== 'path') {
-      queryParams.append(key, value);
-    }
-  });
-  const queryString = queryParams.toString();
-  const queryPart = queryString ? `?${queryString}` : '';
+  // Get query string from request
+  const queryString = new URL(req.url, `http://${req.headers.host}`).search;
   
   // Build the target URL
-  const targetUrl = `https://api.football-data.org/v4/${apiPath}${queryPart}`;
+  const targetUrl = `https://api.football-data.org/v4/matches${queryString}`;
   
-  console.log('Request URL:', req.url);
-  console.log('API Path:', apiPath);
-  console.log('Query String:', queryString);
   console.log('Proxying to:', targetUrl);
   
   try {
@@ -71,8 +54,7 @@ export default async function handler(req, res) {
     console.error('Proxy error:', error);
     return res.status(500).json({ 
       error: 'Failed to proxy request', 
-      message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      message: error.message
     });
   }
 }
