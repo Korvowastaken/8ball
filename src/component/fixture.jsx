@@ -58,7 +58,6 @@ function fixture() {
       .then((data) => {
         const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
         setFixtures(fixturesData);
-        setSearchHits(fixturesData.length);
         console.log('Fetched fixtures:', fixturesData);
       })
       .catch((err) => {

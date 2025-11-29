@@ -22,7 +22,7 @@ export default function LiveMatches() {
     
         const controller = new AbortController();
     
-        fetch(`${BASE_URL}matches?status=LIVE`, {
+        fetch(`${BASE_URL}/matches?status=LIVE`, {
           method: 'GET',
           headers: {
             'X-Auth-Token': API_KEY,
