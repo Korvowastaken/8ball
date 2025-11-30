@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/MatchDetails.css';
 
 const API_KEY = import.meta.env.VITE_API_KEY2;
-const BASE_URL = '/api/football-data';
+const BASE_URL = import.meta.env.PROD
+  ? 'https://api.football-data.org/v4'
+  : '/api/football-data';
 
 function MatchDetails() {
   const { matchId } = useParams();
