@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import '../styles/MatchDetails.css';
 
 const API_KEY = import.meta.env.VITE_API_KEY2;
 const BASE_URL = '/api/football-data';
@@ -75,7 +76,7 @@ function MatchDetails() {
             <span className="away-score">{match.score?.fullTime?.away ?? '-'}</span>
           </div>
           <div className="status">
-            <p>Status: {match.status || 'TBD'}</p>
+            <p>{(match.status === 'IN_PLAY' ? 'Live' : match.status) || 'TBD'}</p>
             <p>Date: {match.utcDate ? new Date(match.utcDate).toLocaleString() : 'TBD'}</p>
           </div>
         </div>

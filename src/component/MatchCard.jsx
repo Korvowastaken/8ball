@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './MatchCard.css';
+import '../styles/MatchCard.css';
 
 function MatchCard({ item, isLive = false }) {
+  
   const navigate = useNavigate();
+
 
   const handleClick = () => {
     if (item.id) {

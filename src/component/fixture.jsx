@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom';
 import { addDays, format } from 'date-fns';
+
+import MatchCard from './MatchCard';
 
 
 const API_KEY = import.meta.env.VITE_API_KEY2;
 const BASE_URL = '/api/football-data';
 
 function fixture() {
-  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() =>
     new Date().toISOString().split('T')[0]
   );
@@ -18,10 +18,8 @@ function fixture() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    searchfixture();
-  }, []);
 
+  
   function getNextDay(dateString) {
     const date = new Date(dateString);
     const nextDay = addDays(date, 1);
@@ -45,30 +43,27 @@ function fixture() {
     const controller = new AbortController();
 
     // Format date for API (YYYY-MM-DD)
-    const url = `${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`;    
-    fetch(url, {    
+    const formattedDate = selectedDate;
+    fetch(`${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`, {    
       method: 'GET',
       headers: {
         'X-Auth-Token': API_KEY,
       },
       signal: controller.signal,
     })
-      .then(async (res) => {
-        console.log('🔵 Client: Response status:', res.status, res.statusText);
+      .then((res) => {
         if (!res.ok) {
-          const errorText = await res.text();
-          console.error('🔴 Client: Error response:', errorText);
-          throw new Error(`Request failed with ${res.status}: ${errorText}`);
+          throw new Error(`Request failed with ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
         const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
         setFixtures(fixturesData);
+        console.log('Fetched fixtures:', fixturesData);
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
-          console.error('🔴 Client: Fetch error:', err);
           setError(err.message || 'Failed to load fixtures.');
         }
       })
@@ -116,28 +111,8 @@ function fixture() {
                       </li>
                     )}
                     
-                    <li key={item.id ?? item.utcDate}>
-                      <div id="teams-logos">
-                        <img src={item.homeTeam?.crest} alt={item.homeTeam?.name} />
-                        <img src={item.awayTeam?.crest} alt={item.awayTeam?.name} />
-                      </div>
-
-                      <div id="teams"> 
-                        <p>{item.homeTeam?.name}</p>
-                        <p>{item.awayTeam?.name}</p> 
-                      </div>
-
-                      <div id="goals">
-                        <p>{item.score?.fullTime?.home ?? item.score?.halfTime?.home ?? '-'}</p>
-                        <p>{item.score?.fullTime?.away ?? item.score?.halfTime?.away ?? '-'}</p>
-                      </div>
-
-                      <div id="status">
-                        <p>{item.status || 'TBD'}</p>
-                        <p>{item.utcDate ? new Date(item.utcDate).toLocaleTimeString() : 'TBD'}</p>
-                        <p>{item.venue || 'Unknown venue'}</p>
-                      </div>
-                    </li>
+                    <MatchCard key={item.id ?? item.utcDate} item={item} isLive={true} />
+                    
                   </React.Fragment>
                 );
               });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MatchCard from './MatchCard.jsx';
+import '../styles/live.css'
 
 const API_KEY = import.meta.env.VITE_API_KEY2;
 const BASE_URL = '/api/football-data';
@@ -26,6 +27,8 @@ function LiveMatches() {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
         throw new Error(`Failed to fetch live matches: ${response.status}`);
       }
 
@@ -41,7 +44,7 @@ function LiveMatches() {
 
   if (loading) return <p>Loading live matches...</p>;
   if (error) return <p>Error: {error}</p>;
-  if (liveMatches.length === 0) return <p>No live matches currently available.</p>;
+  if (liveMatches.length === 0) return <p>No Major league live matches currently available.</p>;
 
   return (
     <div className="live-matches">
