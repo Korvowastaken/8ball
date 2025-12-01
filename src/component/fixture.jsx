@@ -50,6 +50,8 @@ function fixture() {
       method: 'GET',
       headers: {
         'X-Auth-Token': API_KEY,
+        'Access-Control-Allow-Origin': 'https://sport-data.vercel.app'
+
       },
       signal: controller.signal,
     })
