@@ -1,13 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import { addDays, format } from 'date-fns';
-
 import MatchCard from './MatchCard';
-
-
-const API_KEY = import.meta.env.VITE_API_KEY2;
-const BASE_URL = import.meta.env.PROD
-  ? 'https://api.football-data.org/v4'
-  : '/api/football-data';
 
 function fixture() {
   
@@ -30,27 +23,15 @@ function fixture() {
   }
 
   const searchfixture = useCallback(() => {
-    if (!API_KEY) {
-      setError('Missing API key');
-      setLoading(false);
-      return;
-    }
-
-    if (!selectedDate) {
-      setError('Please select a date');
-      return;
-    }
-
     setLoading(true);
     setError('');
     const controller = new AbortController();
 
-    // Format date for API (YYYY-MM-DD)
-    const formattedDate = selectedDate;
-    fetch(`${BASE_URL}/matches?dateFrom=${selectedDate}&dateTo=${nextDate}`, {    
+    // Use the serverless function endpoint
+    fetch(`/api/live-matches?dateFrom=${selectedDate}&dateTo=${nextDate}`, {
       method: 'GET',
       headers: {
-        'X-Auth-Token': API_KEY,
+        'Content-Type': 'application/json',
       },
       signal: controller.signal,
     })
