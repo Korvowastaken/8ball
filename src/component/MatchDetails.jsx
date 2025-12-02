@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/MatchDetails.css';
 
-const API_KEY = import.meta.env.VITE_API_KEY2;
-const BASE_URL = import.meta.env.PROD
-  ? 'https://api.football-data.org/v4'
-  : '/api/football-data';
-
 function MatchDetails() {
   const { matchId } = useParams();
   const navigate = useNavigate();
@@ -21,14 +16,17 @@ function MatchDetails() {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchMatchDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${BASE_URL}/matches/${matchId}`, {
+        const response = await fetch(`/api/match-details?id=${matchId}`, {
           method: 'GET',
           headers: {
-            'X-Auth-Token': API_KEY,
+            'Content-Type': 'application/json',
           },
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -38,13 +36,17 @@ function MatchDetails() {
         const data = await response.json();
         setMatch(data);
       } catch (err) {
-        setError(err.message || 'Failed to load match details');
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'Failed to load match details');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchMatchDetails();
+
+    return () => controller.abort();
   }, [matchId]);
 
   if (loading) return <p>Loading match details...</p>;

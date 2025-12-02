@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MatchCard from './MatchCard.jsx';
-import '../styles/live.css'
-
-const API_KEY = import.meta.env.VITE_API_KEY2;
-const BASE_URL = import.meta.env.PROD
-  ? 'https://api.football-data.org/v4'
-  : '/api/football-data';
+import '../styles/live.css';
 
 function LiveMatches() {
   const [liveMatches, setLiveMatches] = useState([]);
@@ -13,37 +8,43 @@ function LiveMatches() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchLiveMatches();
-  }, []);
+    const controller = new AbortController();
 
-  const fetchLiveMatches = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      const response = await fetch(`${BASE_URL}/matches?status=LIVE`, {
-        method: 'GET',
-        headers: {
-          'X-Auth-Token': API_KEY,
-          'Access-Control-Allow-Origin': 'https://sport-data.vercel.app'
-        },
-      });
+    const fetchLiveMatches = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response:', errorText);
-        throw new Error(`Failed to fetch live matches: ${response.status}`);
+        const response = await fetch('/api/live-matches?status=LIVE', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log('Error response:', errorText);
+          throw new Error(`Failed to fetch live matches: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const matchesData = Array.isArray(data?.matches) ? data.matches : [];
+        setLiveMatches(matchesData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'Failed to load live matches');
+        }
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-      const matchesData = Array.isArray(data?.matches) ? data.matches : [];
-      setLiveMatches(matchesData);
-    } catch (err) {
-      setError(err.message || 'Failed to load live matches');
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchLiveMatches();
+
+    return () => controller.abort();
+  }, []);
 
   if (loading) return <p>Loading live matches...</p>;
   if (error) return <p>Error: {error}</p>;
