@@ -10,6 +10,7 @@ const BASE_URL = import.meta.env.PROD
   : '/api/football-data';
 
 function fixture() {
+  
   const [selectedDate, setSelectedDate] = useState(() =>
     new Date().toISOString().split('T')[0]
   );
@@ -50,8 +51,6 @@ function fixture() {
       method: 'GET',
       headers: {
         'X-Auth-Token': API_KEY,
-        'Access-Control-Allow-Origin': 'https://sport-data.vercel.app'
-
       },
       signal: controller.signal,
     })
