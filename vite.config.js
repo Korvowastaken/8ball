@@ -32,6 +32,23 @@ export default defineConfig(({ command, mode }) => {
         },
         secure: true,
       },
+      '/api/match-details': {
+        target: 'https://api.football-data.org/v4',
+        changeOrigin: true,
+        rewrite: (path) => {
+          const matchId = new URL('http://localhost' + path).searchParams.get('id');
+          return `/matches/${matchId}`;
+        },
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            const apiKey = env.VITE_FOOTBALL_DATA_API_KEY;
+            if (apiKey) {
+              proxyReq.setHeader('X-Auth-Token', apiKey);
+            }
+          });
+        },
+        secure: true,
+      },
       '/api/football-data': {
         target: 'https://api.football-data.org/v4',
         changeOrigin: true,

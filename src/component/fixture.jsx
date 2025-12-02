@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { addDays, format } from 'date-fns';
 import MatchCard from './MatchCard';
+import '../styles/fixture.css'
 
 function fixture() {
   
@@ -52,31 +53,38 @@ function fixture() {
         }
       })
       .finally(() => setLoading(false));
-  }, [selectedDate]);
+  }, [selectedDate, nextDate]);
+
+  useEffect(() => {
+    searchfixture();
+  }, [searchfixture]);
 
   return (
     <>
-      <input
+      <div className="search">
+        <input
+        className='srch-input'
         type="date"
         value={selectedDate}
         onChange={(e) => {
           setSelectedDate(e.target.value)
           setNextDate(getNextDay(e.target.value))
         }}
-      />
-      <button onClick={searchfixture}>
-        search
-      </button>
-
-      {loading && <p>Loading fixtures...</p>}
-      {!loading && error && <p>{error}</p>}
-      {!loading && !error && fixtures.length === 0 && <p>No fixtures found for this date.</p>}
-      {!loading && !error && fixtures.length > 0 &&  (() => {
-        return fixtures.length === 0 ? (
-          <p>No major league fixtures found for this date.</p>
+        />
+        {/* <button onClick={searchfixture} className='srch-btn'>
+          SEARCH
+        </button> */}
+      </div>
+      <div className='result'>
+        {loading && <p>Loading fixtures...</p>}
+        {!loading && error && <p>{error}</p>}
+        {!loading && !error && fixtures.length === 0 && <p>No fixtures found for this date.</p>}
+        {!loading && !error && fixtures.length > 0 &&  (() => {
+          return fixtures.length === 0 ? (
+            <p className='hitStat'>No major league fixtures found for this date.</p>
         ) : (
           <>
-            <p>Found {fixtures.length} major league matches</p>
+            <p className='hitStat'>Found {fixtures.length} major league matches</p>
           <ul id="matches-list">
             {(() => {
               let previousLeague = '';
@@ -105,6 +113,9 @@ function fixture() {
         </>
         );
       })()}
+      </div>
+
+      
     </>
   )
 }

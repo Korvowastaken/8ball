@@ -11,15 +11,17 @@ function App() {
   return (
     <Router>
       <div className='option-btn'>
-        <button onClick={() => setOption('live')}>live</button>
-        <button onClick={() => setOption('fixture')}>fixture</button>
+        <button onClick={() => setOption('live')}>LIVE</button>
+        <button onClick={() => setOption('fixture')}>SCHEDULES</button>
       </div>
       
-      <Routes>
+     <div className="content">
+       <Routes>
         <Route path="/" element={option === 'live' ? <LiveMatches /> : <Fixture />} />
         <Route path="/match/:matchId" element={<MatchDetails />} />
       </Routes>
-      
+     </div>
+
       <footer>
         <p>made by Robel</p>
       </footer>
