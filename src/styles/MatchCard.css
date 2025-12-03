@@ -1,7 +1,5 @@
 .league-header > h2{
   background-color: aliceblue;
-  text-align: left;
-  justify-self: flex-start;
 }
 .match-card{
   display: flex;
@@ -14,6 +12,7 @@
 
 .home-team,
 .away-team{
+  padding-right: 24px;
   display: flex;
   align-items: center;
   gap: 25px;
@@ -24,16 +23,17 @@
 
 .home-team img,
 .away-team img{
-  height: 60px; 
-}
-
-.home-team img,
-.away-team img{
-  height: 60px; 
+  width: 60px; 
 }
 
 .team-name{
   justify-self: center;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1rem;
+}
 
+.team-score{
+  margin-left: auto;
+  font-weight: 800;
+  font-size: 1.2rem;
 }
