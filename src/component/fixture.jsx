@@ -76,9 +76,9 @@ function fixture() {
         </button> */}
       </div>
       <div className='result'>
-        {loading && <p>Loading fixtures...</p>}
-        {!loading && error && <p>{error}</p>}
-        {!loading && !error && fixtures.length === 0 && <p>No fixtures found for this date.</p>}
+        {loading && <p className='hitStat'>Loading fixtures...</p>}
+        {!loading && error && <p className='hitStat'>{error}</p>}
+        {!loading && !error && fixtures.length === 0 && <p className='hitStat'>No fixtures found for this date.</p>}
         {!loading && !error && fixtures.length > 0 &&  (() => {
           return fixtures.length === 0 ? (
             <p className='hitStat'>No major league fixtures found for this date.</p>

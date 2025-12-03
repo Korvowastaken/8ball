@@ -35,27 +35,44 @@ function MatchCard({ item, isLive = false }) {
       style={{ cursor: 'pointer' }}
       className={`match-card ${isLive ? 'live-match' : 'fixture-match'}`}
     >
-      <div id="teams-logos">
+      <div className="home-team">
         <img src={item.homeTeam?.crest} alt={item.homeTeam?.name} />
+        <p className='team-name'>{item.homeTeam?.name}</p>
+        <p className='team-score'>{scores.home}</p>
+        
+      </div>
+
+      <div className="away-team">
+        <img src={item.awayTeam?.crest} alt={item.awayTeam?.name} />
+        <p className='team-name'>{item.awayTeam?.name}</p>
+        <p className='team-score'>{scores.away}</p>
+        
+      </div>
+
+      {/* <div className="teams-logos">
+        <img src={item.homeTeam?.crest} alt={item.homeTeam?.name} />
+        <p>VS</p>
         <img src={item.awayTeam?.crest} alt={item.awayTeam?.name} />
       </div>
 
-      <div id="teams"> 
-        <p>{item.homeTeam?.name}</p>
-        <p>{item.awayTeam?.name}</p> 
-      </div>
-
-      <div id="goals">
+      <div className="goals">
         <p>{scores.home}</p>
         <p>{scores.away}</p>
       </div>
 
-      <div id="status">
-        <p className={`match-status ${isLive && item.status === 'LIVE' ? 'live-indicator' : ''}`}>
+      <div className="teams"> 
+        <p>{item.homeTeam?.name}</p>
+        <p>{item.awayTeam?.name}</p> 
+      </div> */}
+
+      
+
+      <div className="status">
+        {/* <p className={`match-status ${isLive && item.status === 'LIVE' ? 'live-indicator' : ''}`}>
           {item.status || 'TBD'}
-        </p>
+        </p> */}
         <p>{item.utcDate ? new Date(item.utcDate).toLocaleTimeString() : 'TBD'}</p>
-        <p>{item.venue || 'Unknown venue'}</p>
+        {/* <p className="venue">{item.venue || 'Unknown venue'}</p> */}
       </div>
     </li>
   );
