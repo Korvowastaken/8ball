@@ -1,6 +1,4 @@
-.league-header > h2{
-  background-color: aliceblue;
-}
+
 .match-card{
   display: flex;
   flex-direction: column;

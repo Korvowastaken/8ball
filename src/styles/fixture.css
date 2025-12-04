@@ -40,9 +40,18 @@
 }
 
 .result{
-    box-sizing: calc(100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  box-sizing: calc(100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.league-header > h2{
+
+  font-size: 1.2rem;
+  width: 100%;
+  text-align: left;
+  color: #e1e4e8;
+
 }

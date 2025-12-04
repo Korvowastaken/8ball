@@ -21,8 +21,8 @@ function MatchCard({ item, isLive = false }) {
       };
     }
     return {
-      home: item.score?.fullTime?.home ?? item.score?.halfTime?.home ?? '-',
-      away: item.score?.fullTime?.away ?? item.score?.halfTime?.away ?? '-'
+      home: item.score?.fullTime?.home ?? item.score?.halfTime?.home ?? '0',
+      away: item.score?.fullTime?.away ?? item.score?.halfTime?.away ?? '0'
     };
   };
 
@@ -47,32 +47,10 @@ function MatchCard({ item, isLive = false }) {
         <p className='team-name'>{item.awayTeam?.name}</p>
         <p className='team-score'>{scores.away}</p>
         
-      </div>
-
-      {/* <div className="teams-logos">
-        <img src={item.homeTeam?.crest} alt={item.homeTeam?.name} />
-        <p>VS</p>
-        <img src={item.awayTeam?.crest} alt={item.awayTeam?.name} />
-      </div>
-
-      <div className="goals">
-        <p>{scores.home}</p>
-        <p>{scores.away}</p>
-      </div>
-
-      <div className="teams"> 
-        <p>{item.homeTeam?.name}</p>
-        <p>{item.awayTeam?.name}</p> 
-      </div> */}
-
-      
+      </div>      
 
       <div className="status">
-        {/* <p className={`match-status ${isLive && item.status === 'LIVE' ? 'live-indicator' : ''}`}>
-          {item.status || 'TBD'}
-        </p> */}
         <p>{item.utcDate ? new Date(item.utcDate).toLocaleTimeString() : 'TBD'}</p>
-        {/* <p className="venue">{item.venue || 'Unknown venue'}</p> */}
       </div>
     </li>
   );
