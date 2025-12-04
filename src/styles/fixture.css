@@ -46,12 +46,16 @@
   align-items: center;
   justify-content: center;
 }
-
-.league-header > h2{
-
-  font-size: 1.2rem;
-  width: 100%;
-  text-align: left;
-  color: #e1e4e8;
-
+#matches-list{
+  display: flex;
+  flex-direction: column;
+}
+.league-header{
+  width: 90%;
+  border-bottom: 2px solid #fffce4;
+  align-self: left;
+  font-size: 1rem;
+  color: #fffce4;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }

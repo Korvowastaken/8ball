@@ -2,10 +2,13 @@
 .match-card{
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 12px;
   background-color: #abff84;
-  padding: 16px 26px;
+  padding: 16px 10px;
   width: 90%;
   border-radius: 12px;
+  margin-bottom: 1.2rem;
 }
 
 .home-team,
@@ -14,24 +17,33 @@
   display: flex;
   align-items: center;
   gap: 25px;
-  margin-top: 12px;
   text-align: center;
 
 }
 
 .home-team img,
 .away-team img{
-  width: 60px; 
+  width: 2rem; 
+  height: 2rem;
 }
 
 .team-name{
   justify-self: center;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 500;
+  font-size: 0.8rem;
 }
 
 .team-score{
   margin-left: auto;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.2rem;
 }
+
+.status > p{
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 10px;
+}
+
+

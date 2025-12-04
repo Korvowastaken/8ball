@@ -19,8 +19,9 @@ body {
   display: flex;
   flex-direction: row;
   min-height: 10vh;
-  gap: 2rem;
+  gap: 2.5rem;
   justify-content: center;
+  padding: 0.75rem;
 }
 
 .option-btn button {
@@ -28,6 +29,10 @@ body {
   border: 2px solid #7c7c6f;
   color: #7c7c6f;
   font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  min-width: 100px;
+  border-radius: 10px;
 }
 
 .option-btn button:hover {
@@ -68,14 +73,16 @@ body {
 footer {
   text-align: center;
   padding: 2rem 1rem;
-  background-color: #2c3e50;
-  color: white;
+  background-color: #0e100f;
+  border-top: 2px solid #fffce4;
+  color: #7c7c6f;
   margin-top: 2rem;
 }
 
 footer p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
+  color: #fffce4;
 }
 
 main {
@@ -85,17 +92,6 @@ main {
 
 /* Mobile First - Base Styles */
 @media (max-width: 480px) {
-  .option-btn {
-    padding: 0.75rem;
-    gap: 2.5rem;
-  }
-
-  .option-btn button {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.9rem;
-    min-width: 100px;
-    border-radius: 10px;
-  }
 
   main {
     padding: 0.5rem;
@@ -109,22 +105,12 @@ main {
 
 /* Tablet */
 @media (min-width: 481px) and (max-width: 768px) {
-  .option-btn button {
-    padding: 0.7rem 1.5rem;
-    min-width: 110px;
-  }
+  /* Using base button styles */
 }
 
 /* Desktop */
 @media (min-width: 769px) {
-  .option-btn {
-    padding: 1.25rem;
-  }
-
-  .option-btn button {
-    padding: 0.85rem 2.5rem;
-    font-size: 1.1rem;
-  }
+  /* Using base button styles */
 }
 
 

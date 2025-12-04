@@ -44,8 +44,20 @@ function fixture() {
       })
       .then((data) => {
         const fixturesData = Array.isArray(data?.matches) ? data.matches : [];
-        setFixtures(fixturesData);
-        console.log('Fetched fixtures:', fixturesData);
+        
+        
+        const sortedFixtures = [...fixturesData].sort((a, b) => {
+          const leagueA = a.competition?.name || '';
+          const leagueB = b.competition?.name || '';
+          
+          if (leagueA < leagueB) return -1;
+          if (leagueA > leagueB) return 1;
+          
+          return new Date(a.utcDate) - new Date(b.utcDate);
+        });
+        
+        setFixtures(sortedFixtures);
+        console.log('Fetched and sorted fixtures:', sortedFixtures);
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
