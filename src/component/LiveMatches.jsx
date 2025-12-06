@@ -12,7 +12,6 @@ function LiveMatches() {
 
     const fetchLiveMatches = async () => {
       try {
-        setLoading(true);
         setError('');
 
         const response = await fetch('/api/live-matches?status=LIVE', {
@@ -46,39 +45,54 @@ function LiveMatches() {
     return () => controller.abort();
   }, []);
 
-  if (loading) return <p>Loading live matches...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (liveMatches.length === 0) return <p>No Major league live matches currently available.</p>;
+  if (loading) {
+    return (
+      <div className="live-matches">
+        <h1>Live Matches</h1>
+        <p className='hitStat'>Loading live matches...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="live-matches">
       <h1>Live Matches</h1>
-      <p>Found {liveMatches.length} live matches</p>
       
-      <ul id="matches-list">
-        {(() => {
-          let previousLeague = '';
-          return liveMatches.map((match) => {
-            const currentLeague = match.competition?.name || 'Unknown League';
-            const isNewLeague = currentLeague !== previousLeague;
-            if (isNewLeague) {
-              previousLeague = currentLeague;
-            }
+      {error ? (
+        <p className='hitStat'>Error: {error}</p>
+      ) : liveMatches.length === 0 ? (
+        <p className='hitStat'>No major league live matches currently available.</p>
+      ) : (
+        <>
+          <p className='hitStat'>
+            Found {liveMatches.length} live match{liveMatches.length !== 1 ? 'es' : ''}
+          </p>
+          <ul id="matches-list">
+            {(() => {
+              let previousLeague = '';
+              return liveMatches.map((match) => {
+                const currentLeague = match.competition?.name || 'Unknown League';
+                const isNewLeague = currentLeague !== previousLeague;
+                if (isNewLeague) {
+                  previousLeague = currentLeague;
+                }
                   
-            return (
-              <React.Fragment key={`${match.id ?? match.utcDate}-fragment`}>
-                {isNewLeague && (
-                  <li key={`league-${currentLeague}`} className="league-header">
-                    <h2>{currentLeague}</h2>
-                  </li>
-                )}
-                
-                <MatchCard key={match.id ?? match.utcDate} item={match} isLive={true} />
-              </React.Fragment>
-            );
-          });
-        })()}
-      </ul>
+                return (
+                  <React.Fragment key={`${match.id ?? match.utcDate}-fragment`}>
+                    {isNewLeague && (
+                      <li key={`league-${currentLeague}`} className="league-header">
+                        <h2>{currentLeague}</h2>
+                      </li>
+                    )}
+                    
+                    <MatchCard key={match.id ?? match.utcDate} item={match} isLive={true} />
+                  </React.Fragment>
+                );
+              });
+            })()}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

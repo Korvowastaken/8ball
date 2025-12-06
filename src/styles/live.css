@@ -10,6 +10,19 @@ main > p {
   font-size: 1.1rem;
   color: #666;
 }
+
+.live-matches{
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.live-matches > h1{
+  color: #fffce4 ;
+
+}
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   main > p {
