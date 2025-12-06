@@ -77,25 +77,22 @@ function LiveMatches() {
 
   if (loading) {
     return (
-      <div className="live-matches">
-        <h1>Live Matches</h1>
+      <div className="result">
         <p className='hitStat' style={{ marginTop: '2rem' }}>Loading live matches...</p>
       </div>
     );
   }
 
   return (
-    <div className="live-matches">
-      <h1>Live Matches</h1>
-      
+    <div className="result">
       {error ? (
-        <p className='hitStat'>Error: {error}</p>
+        <p className='hitStat'>{error}</p>
       ) : liveMatches.length === 0 ? (
-        <p className='hitStat'  style={{ marginTop: '2rem' }}>No major league live matches currently available.</p>
+        <p className='hitStat' style={{ marginTop: '2rem' }}>No major league live matches currently available.</p>
       ) : (
         <>
           <p className='hitStat'>
-            Found {liveMatches.length} live match{liveMatches.length !== 1 ? 'es' : ''}
+            Found {liveMatches.length} major league live match{liveMatches.length !== 1 ? 'es' : ''}
           </p>
           <ul id="matches-list">
             {(() => {
@@ -106,7 +103,7 @@ function LiveMatches() {
                 if (isNewLeague) {
                   previousLeague = currentLeague;
                 }
-                  
+                
                 return (
                   <React.Fragment key={`${match.id ?? match.utcDate}-fragment`}>
                     {isNewLeague && (
