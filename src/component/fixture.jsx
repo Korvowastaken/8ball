@@ -57,7 +57,7 @@ function fixture() {
         });
         
         setFixtures(sortedFixtures);
-        console.log('Fetched and sorted fixtures:', sortedFixtures);
+        // console.log('Fetched and sorted fixtures:', sortedFixtures);
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {

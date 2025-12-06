@@ -6,9 +6,11 @@ function LiveMatches() {
   const [liveMatches, setLiveMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [apiResponded, setApiResponded] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let isMounted = true;
+    let minLoadingTimer;
 
     const fetchLiveMatches = async () => {
       try {
@@ -19,7 +21,6 @@ function LiveMatches() {
           headers: {
             'Content-Type': 'application/json',
           },
-          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -30,26 +31,55 @@ function LiveMatches() {
 
         const data = await response.json();
         const matchesData = Array.isArray(data?.matches) ? data.matches : [];
-        setLiveMatches(matchesData);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          setError(err.message || 'Failed to load live matches');
+        
+        if (isMounted) {
+          setLiveMatches(matchesData);
+          setApiResponded(true);
         }
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        if (isMounted && err.name !== 'AbortError') {
+          setError(err.message || 'Failed to load live matches');
+          setApiResponded(true);
+        }
       }
     };
 
-    fetchLiveMatches();
+    minLoadingTimer = setTimeout(() => {
+      if (isMounted && apiResponded) {
+        setLoading(false);
+      }
+    }, 500);
 
-    return () => controller.abort();
-  }, []);
+    fetchLiveMatches().then(() => {
+      if (isMounted && apiResponded) {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 500 - elapsedTime);
+        
+        if (remainingTime === 0) {
+          setLoading(false);
+        } else {
+          setTimeout(() => {
+            if (isMounted) {
+              setLoading(false);
+            }
+          }, remainingTime);
+        }
+      }
+    });
+
+    const startTime = Date.now();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(minLoadingTimer);
+    };
+  }, [apiResponded]);
 
   if (loading) {
     return (
       <div className="live-matches">
         <h1>Live Matches</h1>
-        <p className='hitStat'>Loading live matches...</p>
+        <p className='hitStat' style={{ marginTop: '2rem' }}>Loading live matches...</p>
       </div>
     );
   }
@@ -61,7 +91,7 @@ function LiveMatches() {
       {error ? (
         <p className='hitStat'>Error: {error}</p>
       ) : liveMatches.length === 0 ? (
-        <p className='hitStat'>No major league live matches currently available.</p>
+        <p className='hitStat'  style={{ marginTop: '2rem' }}>No major league live matches currently available.</p>
       ) : (
         <>
           <p className='hitStat'>
