@@ -67,7 +67,7 @@
   opacity: 0.7;
 }
 
-.teams-grid{
+.teams-grid {
   min-height: 200px;
   display: flex;
   flex-direction: row;
@@ -75,11 +75,13 @@
   gap: 44px;
   background: #abff84a9;
   border-radius: 8px;
+  padding: 20px;
 }
 
-.team-logo-container > img{
+.team-logo-container > img {
   height: 150px;
   width: 150px;
+  object-fit: contain;
 }
 
 .teams-section {
@@ -90,30 +92,36 @@
   padding: 20px 24px;
   border-radius: 16px;
 }
-.team-info{
+
+.team-info {
   display: flex;
   flex-direction: column-reverse;
   justify-content: center;
 }
-.team-info >div{
+
+.team-info > div {
   width: calc(100%);
 }
-.team-logo-container > .team-name{
+
+.team-logo-container > .team-name {
   color: #181818;
   letter-spacing: 0.1rem;
   font-size: 1.2rem;
   font-weight: 900;
 }
-.team-info > .team-score{
+
+.team-info > .team-score {
   font-size: 3rem;
 }
-.team-card{
+
+.team-card {
   display: flex;
   gap: 4rem;
   align-items: center;
   padding: 2rem;
 }
-.away-team{
+
+.away-team-det {
   display: flex;
   flex-direction: row-reverse;
 }
@@ -157,7 +165,8 @@
   font-weight: bold;
 }
 
-.home-score, .away-score {
+.home-score,
+.away-score {
   color: #111;
   margin: 0 20px;
 }
@@ -186,7 +195,7 @@
   margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .info-group {
@@ -231,44 +240,107 @@
   border-left: 4px solid #abff84;
 }
 
+
+/* Tablet */
 @media (max-width: 768px) {
-  .teams-section {
-    flex-direction: column;
-    padding: 20px;
-  }
-  
-  .team-column {
-    margin-bottom: 16px;
-  }
-  
-  .score {
-    font-size: 2em;
-  }
-  
+ 
   .match-header h1 {
     font-size: 2em;
   }
-  
-  .info-grid {
-    grid-template-columns: 1fr;
+
+  .team-logo-container > img {
+    width: 90px;
+    height: 90px;
+  }
+
+  .team-logo-container > .team-name {
+    font-size: 1.1rem;
+  }
+  .team-info{
+    gap: 0.6rem;
+  }
+
+  .team-info > .team-score {
+    font-size: 2.4rem;
+  }
+
+  .score {
+    font-size: 2em;
+  }
+
+  .back-button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .match-details {
+    padding: 16px;
+  }
+
+  .team-card {
+    gap: 2rem;
+    padding: 1.5rem;
   }
 }
 
+/* Mobile */
 @media (max-width: 480px) {
-  .match-details {
-    padding: 10px;
+
+  .team-card{
+    flex-direction: column-reverse;
+
   }
-  
-  .team img {
+  .match-header h1 {
+    font-size: 1.6em;
+  }
+
+  .team-logo-container > img {
     width: 60px;
     height: 60px;
   }
-  
+
+  .team-logo-container > .team-name {
+    font-size: 1rem;
+  }
+
+  .team-info{
+    gap: 0.3rem;
+  }
+
+  .team-info > .team-score {
+    font-size: 1.8rem;
+  }
+
   .score {
     font-size: 1.5em;
   }
-  
-  .match-header h1 {
-    font-size: 1.8em;
+
+  .back-button {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .match-details {
+    padding: 12px;
+  }
+
+  .team-card {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .competition-emblem {
+    width: 40px;
+    height: 40px;
+  }
+
+  .area-flag {
+    width: 16px;
+    height: 11px;
+  }
+
+  .competition-meta {
+    font-size: 0.85rem;
+    gap: 4px;
   }
 }
