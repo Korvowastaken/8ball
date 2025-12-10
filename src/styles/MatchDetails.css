@@ -120,6 +120,21 @@
   align-items: center;
   padding: 2rem;
 }
+.match-status{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-vs > p{
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111;
+}
+.match-time{
+  font-size: 1rem;
+}
 
 .away-team-det {
   display: flex;
