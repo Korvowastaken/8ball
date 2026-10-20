@@ -40,7 +40,10 @@ export async function matchDetails(id) {
     stage: m.stage?.replaceAll('_', ' '),
     referees: (m.referees ?? []).map((r) => ({ name: r.name, role: r.type })),
     events: [],
-    stats: [],
+    statGroups: [],
     lineups: [],
+    form: [],
+    standings: [],
+    commentary: [],
   };
 }

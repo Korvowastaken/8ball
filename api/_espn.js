@@ -7,19 +7,37 @@ export const LEAGUES = [
   'ned.1', 'por.1', 'bra.1', 'uefa.champions', 'uefa.europa',
 ];
 
-// shown on the match page, in this order
-const STATS = {
-  possessionPct: 'Possession %',
-  totalShots: 'Shots',
-  shotsOnTarget: 'Shots on target',
-  wonCorners: 'Corners',
-  totalPasses: 'Passes',
-  foulsCommitted: 'Fouls',
-  offsides: 'Offsides',
-  saves: 'Saves',
-  yellowCards: 'Yellow cards',
-  redCards: 'Red cards',
-};
+// ESPN boxscore stat names (seen in real responses), grouped for the match page.
+// ESPN's own *Pct values are skipped; accuracy is computed from accurate/total instead.
+const STAT_GROUPS = [
+  ['General', [
+    ['possessionPct', 'Possession %'], ['wonCorners', 'Corners'], ['offsides', 'Offsides'],
+    ['foulsCommitted', 'Fouls'], ['yellowCards', 'Yellow cards'], ['redCards', 'Red cards'],
+  ]],
+  ['Attack', [
+    ['totalShots', 'Shots'], ['shotsOnTarget', 'Shots on target'], ['blockedShots', 'Blocked shots'],
+    ['penaltyKickShots', 'Penalties taken'], ['penaltyKickGoals', 'Penalties scored'],
+  ]],
+  ['Passing', [
+    ['totalPasses', 'Passes'], ['accuratePasses', 'Accurate passes', 'totalPasses'],
+    ['totalCrosses', 'Crosses'], ['accurateCrosses', 'Accurate crosses', 'totalCrosses'],
+    ['totalLongBalls', 'Long balls'], ['accurateLongBalls', 'Accurate long balls', 'totalLongBalls'],
+  ]],
+  ['Defence', [
+    ['totalTackles', 'Tackles'], ['effectiveTackles', 'Tackles won', 'totalTackles'],
+    ['interceptions', 'Interceptions'], ['totalClearance', 'Clearances'], ['saves', 'Saves'],
+  ]],
+];
+
+// "412" or "412 (87%)" when there is a total to compare against
+function statValue(stats, key, totalKey) {
+  const value = stats?.[key];
+  const total = Number(stats?.[totalKey]);
+  if (value == null || !totalKey || !total) return value ?? null;
+  return `${value} (${Math.round((Number(value) / total) * 100)}%)`;
+}
+
+const asFlag = (v) => Boolean(v?.didSub ?? v);
 
 async function getJson(url) {
   // fail fast so the football-data fallback still answers quickly
@@ -85,7 +103,32 @@ export async function listMatches({ live, days }) {
 
 const toPlayers = (roster, starter) => (roster ?? [])
   .filter((p) => Boolean(p.starter) === starter)
-  .map((p) => ({ name: p.athlete?.displayName, number: p.jersey, position: p.position?.abbreviation }));
+  .map((p) => ({
+    name: p.athlete?.displayName,
+    number: p.jersey,
+    position: p.position?.abbreviation,
+    subbedIn: asFlag(p.subbedIn),
+    subbedOut: asFlag(p.subbedOut),
+  }));
+
+// the league table group that contains this match's teams
+function toStandings(standings, teamIds) {
+  const groups = standings?.groups ?? [];
+  const entriesOf = (g) => g.standings?.entries ?? g.entries ?? [];
+  const group = groups.find((g) => entriesOf(g).some((e) => teamIds.includes(e.team?.id ?? e.id))) ?? groups[0];
+
+  return entriesOf(group ?? {}).map((e) => {
+    const st = Object.fromEntries((e.stats ?? []).map((x) => [x.name ?? x.type, x.displayValue ?? x.value]));
+    return {
+      teamId: e.team?.id ?? e.id,
+      team: e.team?.shortDisplayName ?? e.team?.displayName ?? (typeof e.team === 'string' ? e.team : undefined),
+      rank: st.rank,
+      played: st.gamesPlayed,
+      goalDifference: st.pointDifferential,
+      points: st.points,
+    };
+  }).filter((row) => row.team);
+}
 
 export async function matchDetails(league, eventId) {
   const s = await getJson(`${BASE}/${league}/summary?event=${eventId}`);
@@ -114,9 +157,31 @@ export async function matchDetails(league, eventId) {
       text: e.shortText ?? e.text,
       side: sideOf(e.team.id),
     })),
-    stats: Object.entries(STATS)
-      .filter(([key]) => statsBySide.home?.[key] != null || statsBySide.away?.[key] != null)
-      .map(([key, label]) => ({ label, home: statsBySide.home?.[key] ?? '-', away: statsBySide.away?.[key] ?? '-' })),
+    statGroups: STAT_GROUPS.map(([group, stats]) => ({
+      group,
+      rows: stats
+        .map(([key, label, totalKey]) => ({
+          label,
+          home: statValue(statsBySide.home, key, totalKey),
+          away: statValue(statsBySide.away, key, totalKey),
+        }))
+        .filter((row) => row.home != null || row.away != null),
+    })).filter((g) => g.rows.length),
+    form: (s.lastFiveGames ?? []).map((t) => ({
+      side: sideOf(t.team?.id),
+      team: t.team?.displayName,
+      games: (t.events ?? []).map((g) => ({
+        result: g.gameResult,
+        score: g.score,
+        opponent: g.opponent?.displayName ?? g.opponent?.abbreviation,
+        date: g.gameDate,
+        atVs: g.atVs,
+      })),
+    })).filter((t) => t.games.length),
+    standings: toStandings(s.standings, [match.homeTeam.id, match.awayTeam.id]),
+    commentary: (s.commentary ?? [])
+      .map((c) => ({ minute: c.time?.displayValue, text: c.text }))
+      .filter((c) => c.text),
     lineups: (s.rosters ?? [])
       .filter((r) => r.roster?.length)
       .map((r) => ({
@@ -126,5 +191,23 @@ export async function matchDetails(league, eventId) {
         starters: toPlayers(r.roster, true),
         subs: toPlayers(r.roster, false),
       })),
+  };
+}
+
+// temporary: raw samples of the summary fields whose shape is unconfirmed (match-details?debug=1)
+export async function rawSample(league, eventId) {
+  const s = await getJson(`${BASE}/${league}/summary?event=${eventId}`);
+  const firstGroup = s.standings?.groups?.[0];
+  return {
+    headerLeague: s.header?.league,
+    gameInfo: s.gameInfo,
+    keyEvents: s.keyEvents?.slice(0, 4),
+    commentary: s.commentary?.slice(0, 3),
+    rosters: s.rosters?.map((r) => ({ ...r, roster: r.roster?.slice(0, 2) })),
+    lastFiveGames: s.lastFiveGames?.map((t) => ({ ...t, events: t.events?.slice(0, 2) })),
+    standings: firstGroup && {
+      groupKeys: Object.keys(firstGroup),
+      entries: (firstGroup.standings?.entries ?? firstGroup.entries)?.slice(0, 2),
+    },
   };
 }

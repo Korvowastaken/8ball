@@ -15,6 +15,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    // temporary: raw ESPN fields for checking the converters, see _espn.js rawSample
+    if (espnId && req.query.debug === '1') {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json(await espn.rawSample(espnId[1], espnId[2]));
+    }
+
     const match = espnId
       ? await espn.matchDetails(espnId[1], espnId[2])
       : await footballData.matchDetails(fdId[1]);

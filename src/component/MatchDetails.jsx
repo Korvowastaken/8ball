@@ -1,20 +1,86 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CREST_FALLBACK, onCrestError, statusText } from './matchHelpers';
+import { CREST_FALLBACK, onCrestError, statusText, isLive } from './matchHelpers';
 import '../styles/MatchDetails.css';
 
 const REFRESH_MS = 60_000;
 
-function Team({ team, score, className }) {
+const isGoal = (type = '') => /goal|penalty - scored/i.test(type) && !/disallowed|missed|saved/i.test(type);
+const cardOf = (type = '') => (/red card/i.test(type) ? 'red' : /yellow card/i.test(type) ? 'yellow' : null);
+
+function Section({ title, className = '', children }) {
   return (
-    <div className={`team-card ${className}`}>
-      <div className="team-logo-container">
-        <img src={team?.crest || CREST_FALLBACK} alt={team?.name} onError={onCrestError} />
-        <h3 className="team-name">{team?.shortName || team?.name}</h3>
+    <section className={`md-card ${className}`}>
+      <h3>{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function TeamHeader({ team, scorers, side }) {
+  return (
+    <div className={`md-team ${side}`}>
+      <img src={team?.crest || CREST_FALLBACK} alt="" onError={onCrestError} />
+      <h2>{team?.shortName || team?.name}</h2>
+      {scorers.length > 0 && (
+        <ul className="md-scorers">
+          {scorers.map((e, i) => (
+            <li key={i}>{e.players[0] ?? e.text} {e.minute}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function StatRow({ label, home, away }) {
+  const h = parseFloat(home) || 0;
+  const a = parseFloat(away) || 0;
+  const homeShare = h + a ? (h / (h + a)) * 100 : 50;
+  return (
+    <li className="md-stat">
+      <div className="md-stat-values">
+        <span>{home ?? '-'}</span>
+        <span className="md-stat-label">{label}</span>
+        <span>{away ?? '-'}</span>
       </div>
-      <div className="team-info">
-        <div className="team-score">{score ?? '-'}</div>
+      <div className="md-stat-bar" aria-hidden="true">
+        <span className={h >= a ? 'lead' : ''} style={{ width: `${homeShare}%` }} />
+        <span className={a >= h ? 'lead' : ''} style={{ width: `${100 - homeShare}%` }} />
       </div>
+    </li>
+  );
+}
+
+function Lineup({ lineup, markers }) {
+  const player = (p) => {
+    const m = markers[p.name] ?? {};
+    return (
+      <li key={`${p.number}-${p.name}`}>
+        <span className="md-shirt">{p.number}</span>
+        <span>{p.name}</span>
+        <span className="md-markers">
+          {'⚽'.repeat(m.goals ?? 0)}
+          {m.yellow && <span className="md-card-icon yellow" title="Yellow card" />}
+          {m.red && <span className="md-card-icon red" title="Red card" />}
+          {p.subbedIn && <span className="md-sub in" title="Came on">▲</span>}
+          {p.subbedOut && <span className="md-sub out" title="Went off">▼</span>}
+        </span>
+        <small>{p.position}</small>
+      </li>
+    );
+  };
+
+  return (
+    <div className="md-lineup">
+      <h4>{lineup.team}{lineup.formation ? <small> {lineup.formation}</small> : null}</h4>
+      <ul>{lineup.starters.map(player)}</ul>
+      {lineup.subs.length > 0 && (
+        <>
+          <h5>Substitutes</h5>
+          <ul>{lineup.subs.map(player)}</ul>
+        </>
+      )}
     </div>
   );
 }
@@ -60,150 +126,150 @@ function MatchDetails() {
   if (error) return <p className='hitStat'>Error: {error}</p>;
   if (!match) return <p className='hitStat'>Match not found</p>;
 
-  const teamName = (side) => (side === 'home' ? match.homeTeam : match.awayTeam)?.shortName;
-  const meta = [match.area, match.season && `Season ${match.season}`, match.matchday && `Matchday ${match.matchday}`, match.stage]
-    .filter(Boolean);
+  const events = match.events ?? [];
+  const goals = events.filter((e) => isGoal(e.type));
+  const markers = {};
+  for (const e of events) {
+    const name = e.players?.[0];
+    if (!name) continue;
+    const m = (markers[name] ??= {});
+    if (isGoal(e.type)) m.goals = (m.goals ?? 0) + 1;
+    const card = cardOf(e.type);
+    if (card) m[card] = true;
+  }
+
+  const teamOf = (side) => (side === 'home' ? match.homeTeam : match.awayTeam);
+  const teamIds = [match.homeTeam?.id, match.awayTeam?.id];
+  const meta = [match.area, match.season && `Season ${match.season}`, match.matchday && `Matchday ${match.matchday}`, match.stage];
   const halfTime = match.score?.halfTime;
+  const kickoff = match.utcDate ? new Date(match.utcDate) : null;
 
   return (
-    <div className="match-details">
+    <div className="md">
       <button onClick={() => navigate(-1)} className="back-button">
         ← Back
       </button>
 
-      <div className="match-header">
-        {match.competition?.emblem && (
-          <img src={match.competition.emblem} alt={match.competition.name} className="competition-emblem" />
-        )}
-        <h1>{match.competition?.name || 'Match details'}</h1>
-        {meta.length > 0 && <p className="competition-meta">{meta.join(' · ')}</p>}
-      </div>
-
-      <div className="teams-container">
-        <div className="teams-grid">
-          <Team team={match.homeTeam} score={match.score?.fullTime?.home} className="home-team" />
-
-          <div className="match-status">
-            <div className="match-time">
-              {match.utcDate ? new Date(match.utcDate).toLocaleDateString([], { day: 'numeric', month: 'short' }) : ''}
-            </div>
-            <div className="match-vs">
-              <p>VS</p>
-            </div>
-            <div className={`status-badge ${match.status?.toLowerCase()}`}>{statusText(match)}</div>
+      <header className="md-scoreboard">
+        <p className="md-comp">
+          {match.competition?.emblem && <img src={match.competition.emblem} alt="" />}
+          {[match.competition?.name, kickoff?.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }), ...meta]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+        <div className="md-teams">
+          <TeamHeader team={match.homeTeam} side="home" scorers={goals.filter((e) => e.side === 'home')} />
+          <div className="md-score">
+            <span className="md-score-value">
+              {match.score?.fullTime?.home ?? '-'} - {match.score?.fullTime?.away ?? '-'}
+            </span>
+            <span className={`md-status ${isLive(match) ? 'live' : ''}`}>{statusText(match)}</span>
           </div>
-
-          <Team team={match.awayTeam} score={match.score?.fullTime?.away} className="away-team-det" />
+          <TeamHeader team={match.awayTeam} side="away" scorers={goals.filter((e) => e.side === 'away')} />
         </div>
-      </div>
+      </header>
 
-      <div className="match-info">
-        <h3>Match Information</h3>
-        <div className="info-grid">
-          <div className="info-item">
-            <strong>Kick-off</strong>
-            <span>{match.utcDate ? new Date(match.utcDate).toLocaleString() : 'TBD'}</span>
-          </div>
-          {match.venue && (
-            <div className="info-item">
-              <strong>Venue</strong>
-              <span>{match.venue}</span>
-            </div>
+      <div className="md-grid">
+        <div className="md-col">
+          {events.length > 0 && (
+            <Section title="Timeline">
+              <ol className="md-timeline">
+                {events.map((e, i) => (
+                  <li key={i} className={e.side}>
+                    <span className="md-minute">{e.minute}</span>
+                    <span className="md-event-type">{e.type}</span>
+                    <span>{e.players?.length ? e.players.join(' ↔ ') : e.text}</span>
+                    <small>{teamOf(e.side)?.shortName}</small>
+                  </li>
+                ))}
+              </ol>
+            </Section>
           )}
-          {match.attendance && (
-            <div className="info-item">
-              <strong>Attendance</strong>
-              <span>{match.attendance.toLocaleString()}</span>
-            </div>
-          )}
-          {halfTime?.home != null && (
-            <div className="info-item">
-              <strong>Half Time Score</strong>
-              <span>{halfTime.home} - {halfTime.away}</span>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {match.events?.length > 0 && (
-        <div className="referees-section">
-          <h3>Timeline</h3>
-          <ul className="event-list">
-            {match.events.map((e, i) => (
-              <li key={i} className={`event ${e.side}`}>
-                <span className="event-minute">{e.minute}</span>
-                <strong>{e.type}</strong>
-                <span>{e.players.length ? e.players.join(' ↔ ') : e.text}</span>
-                <span className="event-team">{teamName(e.side)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {match.stats?.length > 0 && (
-        <div className="referees-section">
-          <h3>Stats</h3>
-          <table className="stats-table">
-            <thead>
-              <tr>
-                <th>{match.homeTeam?.shortName}</th>
-                <th></th>
-                <th>{match.awayTeam?.shortName}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {match.stats.map((s) => (
-                <tr key={s.label}>
-                  <td>{s.home}</td>
-                  <th scope="row">{s.label}</th>
-                  <td>{s.away}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {match.lineups?.length > 0 && (
-        <div className="referees-section">
-          <h3>Lineups</h3>
-          <div className="lineups">
-            {match.lineups.map((l) => (
-              <div key={l.side} className="lineup">
-                <h4>{l.team}{l.formation ? ` (${l.formation})` : ''}</h4>
-                <ul>
-                  {l.starters.map((p) => (
-                    <li key={`${p.number}-${p.name}`}>{p.number} {p.name} <small>{p.position}</small></li>
-                  ))}
-                </ul>
-                {l.subs.length > 0 && (
-                  <>
-                    <h5>Substitutes</h5>
-                    <ul>
-                      {l.subs.map((p) => (
-                        <li key={`${p.number}-${p.name}`}>{p.number} {p.name} <small>{p.position}</small></li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+          {match.lineups?.length > 0 && (
+            <Section title="Lineups">
+              <div className="md-lineups">
+                {match.lineups.map((l) => <Lineup key={l.side} lineup={l} markers={markers} />)}
               </div>
-            ))}
-          </div>
+            </Section>
+          )}
         </div>
-      )}
 
-      {match.referees?.length > 0 && (
-        <div className="referees-section">
-          <h3>Match Officials</h3>
-          <ul>
-            {match.referees.map((referee, index) => (
-              <li key={index}>
-                {referee.name} - {referee.role || 'Referee'}
+        <div className="md-col">
+          {match.statGroups?.map((g) => (
+            <Section key={g.group} title={g.group}>
+              <ul className="md-stats">
+                {g.rows.map((row) => <StatRow key={row.label} {...row} />)}
+              </ul>
+            </Section>
+          ))}
+
+          {match.form?.length > 0 && (
+            <Section title="Form (last 5)">
+              {match.form.map((t) => (
+                <div key={t.side} className="md-form">
+                  <span>{t.team}</span>
+                  <span className="md-form-results">
+                    {t.games.map((g, i) => (
+                      <span key={i} className={`md-result ${g.result}`} title={`${g.atVs ?? ''} ${g.opponent ?? ''} ${g.score ?? ''}`.trim()}>
+                        {g.result}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              ))}
+            </Section>
+          )}
+
+          {match.standings?.length > 0 && (
+            <Section title="Table">
+              <table className="md-table">
+                <thead>
+                  <tr><th>#</th><th>Team</th><th>P</th><th>GD</th><th>Pts</th></tr>
+                </thead>
+                <tbody>
+                  {match.standings.map((row) => (
+                    <tr key={row.teamId ?? row.team} className={teamIds.includes(row.teamId) ? 'highlight' : ''}>
+                      <td>{row.rank}</td>
+                      <td>{row.team}</td>
+                      <td>{row.played}</td>
+                      <td>{row.goalDifference}</td>
+                      <td><strong>{row.points}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
+          )}
+
+          <Section title="Match info">
+            <dl className="md-info">
+              {[
+                ['Kick-off', kickoff ? kickoff.toLocaleString() : 'TBD'],
+                ['Venue', match.venue],
+                ['Attendance', match.attendance?.toLocaleString()],
+                ['Half time', halfTime?.home != null ? `${halfTime.home} - ${halfTime.away}` : null],
+                ...(match.referees ?? []).map((r) => [r.role || 'Referee', r.name]),
+              ].filter(([, value]) => value).map(([label, value], i) => (
+                <div key={i}><dt>{label}</dt><dd>{value}</dd></div>
+              ))}
+            </dl>
+          </Section>
+        </div>
+      </div>
+
+      {match.commentary?.length > 0 && (
+        <details className="md-card md-commentary">
+          <summary>Commentary ({match.commentary.length})</summary>
+          <ol>
+            {match.commentary.map((c, i) => (
+              <li key={i}>
+                <span className="md-minute">{c.minute}</span>
+                <span>{c.text}</span>
               </li>
             ))}
-          </ul>
-        </div>
+          </ol>
+        </details>
       )}
     </div>
   );
