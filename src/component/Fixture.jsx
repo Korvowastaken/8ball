@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { addDays, format, parseISO } from 'date-fns';
 import MatchList from './MatchList';
+import { logMatches } from './matchHelpers';
 import '../styles/fixture.css'
 
 // local calendar day, not UTC
@@ -25,11 +26,9 @@ function Fixture() {
       })
       .then((data) => {
         const matches = Array.isArray(data?.matches) ? data.matches : [];
-        setResult({
-          date: selectedDate,
-          fixtures: matches.filter((m) => m.utcDate && toDay(new Date(m.utcDate)) === selectedDate),
-          error: '',
-        });
+        const fixtures = matches.filter((m) => m.utcDate && toDay(new Date(m.utcDate)) === selectedDate);
+        logMatches(`fixtures ${selectedDate}`, data?.source, fixtures);
+        setResult({ date: selectedDate, fixtures, error: '' });
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {

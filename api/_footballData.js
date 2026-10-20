@@ -4,6 +4,7 @@ const BASE = 'https://api.football-data.org/v4';
 async function getJson(path) {
   const res = await fetch(`${BASE}${path}`, {
     headers: { 'X-Auth-Token': process.env.FOOTBALL_DATA_API_KEY },
+    signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) throw Object.assign(new Error(`Football data API error: ${res.status}`), { status: res.status });
   return res.json();

@@ -22,7 +22,8 @@ const STATS = {
 };
 
 async function getJson(url) {
-  const res = await fetch(url);
+  // fail fast so the football-data fallback still answers quickly
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw Object.assign(new Error(`ESPN error: ${res.status}`), { status: res.status });
   return res.json();
 }

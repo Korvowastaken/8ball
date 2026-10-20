@@ -35,7 +35,11 @@ function MatchDetails() {
           if (!res.ok) throw new Error(`Failed to fetch match details: ${res.status}`);
           return res.json();
         })
-        .then((data) => setResult({ id: matchId, match: data, error: '' }))
+        .then((data) => {
+          // temporary: see logMatches
+          console.log(`[8ball] match ${matchId}`, data);
+          setResult({ id: matchId, match: data, error: '' });
+        })
         .catch((err) => {
           if (err.name !== 'AbortError') {
             setResult({ id: matchId, match: null, error: err.message || 'Failed to load match details' });

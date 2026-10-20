@@ -45,4 +45,8 @@ export default defineConfig(({ mode }) => ({
     }),
     apiRoutes(loadEnv(mode, process.cwd(), '')),
   ],
+  server: {
+    // WSL on /mnt/c gets no file events for edits made from Windows, so poll there
+    watch: process.cwd().startsWith('/mnt/') ? { usePolling: true, interval: 300 } : undefined,
+  },
 }))
