@@ -194,20 +194,3 @@ export async function matchDetails(league, eventId) {
   };
 }
 
-// temporary: raw samples of the summary fields whose shape is unconfirmed (match-details?debug=1)
-export async function rawSample(league, eventId) {
-  const s = await getJson(`${BASE}/${league}/summary?event=${eventId}`);
-  const firstGroup = s.standings?.groups?.[0];
-  return {
-    headerLeague: s.header?.league,
-    gameInfo: s.gameInfo,
-    keyEvents: s.keyEvents?.slice(0, 4),
-    commentary: s.commentary?.slice(0, 3),
-    rosters: s.rosters?.map((r) => ({ ...r, roster: r.roster?.slice(0, 2) })),
-    lastFiveGames: s.lastFiveGames?.map((t) => ({ ...t, events: t.events?.slice(0, 2) })),
-    standings: firstGroup && {
-      groupKeys: Object.keys(firstGroup),
-      entries: (firstGroup.standings?.entries ?? firstGroup.entries)?.slice(0, 2),
-    },
-  };
-}

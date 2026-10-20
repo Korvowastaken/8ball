@@ -1,19 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CREST_FALLBACK, onCrestError, statusText, isLive } from './matchHelpers';
+import Paginated from './Paginated';
 import '../styles/MatchDetails.css';
 
 const REFRESH_MS = 60_000;
+const TIMELINE_PAGE = 10;
+const COMMENTARY_PAGE = 15;
 
 const isGoal = (type = '') => /goal|penalty - scored/i.test(type) && !/disallowed|missed|saved/i.test(type);
 const cardOf = (type = '') => (/red card/i.test(type) ? 'red' : /yellow card/i.test(type) ? 'yellow' : null);
 
-function Section({ title, className = '', children }) {
+// Collapsible card. `open` only sets the initial state; the 60s refresh doesn't reset what the user toggled.
+function Section({ title, defaultOpen = false, children }) {
   return (
-    <section className={`md-card ${className}`}>
-      <h3>{title}</h3>
-      {children}
-    </section>
+    <details className="md-card" open={defaultOpen}>
+      <summary>
+        <h3>{title}</h3>
+      </summary>
+      <div className="md-card-body">{children}</div>
+    </details>
   );
 }
 
@@ -101,11 +107,7 @@ function MatchDetails() {
           if (!res.ok) throw new Error(`Failed to fetch match details: ${res.status}`);
           return res.json();
         })
-        .then((data) => {
-          // temporary: see logMatches
-          console.log(`[8ball] match ${matchId}`, data);
-          setResult({ id: matchId, match: data, error: '' });
-        })
+        .then((data) => setResult({ id: matchId, match: data, error: '' }))
         .catch((err) => {
           if (err.name !== 'AbortError') {
             setResult({ id: matchId, match: null, error: err.message || 'Failed to load match details' });
@@ -172,17 +174,21 @@ function MatchDetails() {
       <div className="md-grid">
         <div className="md-col">
           {events.length > 0 && (
-            <Section title="Timeline">
-              <ol className="md-timeline">
-                {events.map((e, i) => (
+            <Section title={`Timeline (${events.length})`} defaultOpen>
+              <Paginated
+                className="md-timeline"
+                // newest first while live, so page 1 is what just happened
+                items={isLive(match) ? [...events].reverse() : events}
+                pageSize={TIMELINE_PAGE}
+                render={(e, i) => (
                   <li key={i} className={e.side}>
                     <span className="md-minute">{e.minute}</span>
                     <span className="md-event-type">{e.type}</span>
                     <span>{e.players?.length ? e.players.join(' ↔ ') : e.text}</span>
                     <small>{teamOf(e.side)?.shortName}</small>
                   </li>
-                ))}
-              </ol>
+                )}
+              />
             </Section>
           )}
 
@@ -196,8 +202,8 @@ function MatchDetails() {
         </div>
 
         <div className="md-col">
-          {match.statGroups?.map((g) => (
-            <Section key={g.group} title={g.group}>
+          {match.statGroups?.map((g, i) => (
+            <Section key={g.group} title={g.group} defaultOpen={i === 0}>
               <ul className="md-stats">
                 {g.rows.map((row) => <StatRow key={row.label} {...row} />)}
               </ul>
@@ -242,7 +248,7 @@ function MatchDetails() {
             </Section>
           )}
 
-          <Section title="Match info">
+          <Section title="Match info" defaultOpen>
             <dl className="md-info">
               {[
                 ['Kick-off', kickoff ? kickoff.toLocaleString() : 'TBD'],
@@ -259,17 +265,21 @@ function MatchDetails() {
       </div>
 
       {match.commentary?.length > 0 && (
-        <details className="md-card md-commentary">
-          <summary>Commentary ({match.commentary.length})</summary>
-          <ol>
-            {match.commentary.map((c, i) => (
-              <li key={i}>
-                <span className="md-minute">{c.minute}</span>
-                <span>{c.text}</span>
-              </li>
-            ))}
-          </ol>
-        </details>
+        <div className="md-commentary">
+          <Section title={`Commentary (${match.commentary.length})`}>
+            <Paginated
+              className="md-commentary-list"
+              items={match.commentary}
+              pageSize={COMMENTARY_PAGE}
+              render={(c, i) => (
+                <li key={i}>
+                  <span className="md-minute">{c.minute}</span>
+                  <span>{c.text}</span>
+                </li>
+              )}
+            />
+          </Section>
+        </div>
       )}
     </div>
   );

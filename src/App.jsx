@@ -2,15 +2,26 @@ import './App.css';
 import LiveMatches from './component/LiveMatches';
 import Fixture from './component/Fixture';
 import MatchDetails from './component/MatchDetails';
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
 
 function App() {
   return (
     <Router>
-      <nav className='option-btn'>
-        <NavLink to="/" end>LIVE</NavLink>
-        <NavLink to="/fixtures">SCHEDULES</NavLink>
-      </nav>
+      <header className="site-header">
+        <nav className="site-nav" aria-label="Main">
+          <Link to="/" className="brand">
+            <img src="/ball.png" alt="" width="28" height="28" />
+            <span>8Ball</span>
+          </Link>
+          <div className="nav-links">
+            <NavLink to="/" end>
+              <span className="live-dot" aria-hidden="true" />
+              Live
+            </NavLink>
+            <NavLink to="/fixtures">Schedule</NavLink>
+          </div>
+        </nav>
+      </header>
 
       <div className="content">
         <Routes>

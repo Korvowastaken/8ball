@@ -127,12 +127,74 @@
   padding: 16px;
 }
 
+.md-card summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.md-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.md-card summary::after {
+  content: '▾';
+  color: #abff84;
+  transition: transform 0.2s ease;
+}
+
+.md-card:not([open]) summary::after {
+  transform: rotate(-90deg);
+}
+
+.md-card summary:focus-visible {
+  outline: 2px solid #abff84;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .md-card h3 {
   color: #abff84;
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 12px;
+}
+
+.md-card-body {
+  margin-top: 12px;
+}
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager button {
+  background: #242526;
+  color: #fffce4;
+  border: 1px solid #3a3b3c;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.pager button:hover:not(:disabled) {
+  border-color: #abff84;
+  color: #abff84;
+}
+
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .md-minute {
@@ -361,22 +423,15 @@
   margin-top: 16px;
 }
 
-.md-commentary summary {
-  cursor: pointer;
-  color: #abff84;
-  font-weight: 700;
-}
-
-.md-commentary ol {
+.md-commentary-list {
   list-style: none;
-  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   font-size: 0.85rem;
 }
 
-.md-commentary li {
+.md-commentary-list li {
   display: grid;
   grid-template-columns: 3.2rem 1fr;
   gap: 8px;

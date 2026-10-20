@@ -5,22 +5,7 @@ export const onCrestError = (e) => {
   e.target.src = CREST_FALLBACK;
 };
 
-// temporary: print API data to the browser console while we verify the ESPN source
-export function logMatches(label, source, matches) {
-  console.log(`[8ball] ${label}: ${matches.length} matches from ${source}`, matches);
-  console.table(matches.map((m) => ({
-    id: m.id,
-    league: m.competition?.name,
-    home: m.homeTeam?.name,
-    away: m.awayTeam?.name,
-    score: `${m.score?.fullTime?.home ?? '-'} - ${m.score?.fullTime?.away ?? '-'}`,
-    status: m.status,
-    minute: m.minute,
-    kickoff: m.utcDate,
-  })));
-}
-
-export const isLive =(match) => match.status === 'IN_PLAY' || match.status === 'PAUSED';
+export const isLive = (match) => match.status === 'IN_PLAY' || match.status === 'PAUSED';
 
 export function statusText(match) {
   if (isLive(match)) return match.minute || 'LIVE';

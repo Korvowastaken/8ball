@@ -14,35 +14,90 @@ body {
 
 }
 
-.option-btn {
-  background-color: #242526;
-  display: flex;
-  flex-direction: row;
-  min-height: 10vh;
-  gap: 2.5rem;
-  justify-content: center;
-  padding: 0.75rem;
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(17, 17, 17, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #242526;
 }
 
-.option-btn a {
+.site-nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 56px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  background-color: #0e100f;
-  border: 2px solid #7c7c6f;
-  color: #7c7c6f;
-  font-weight: 600;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.9rem;
-  min-width: 100px;
-  border-radius: 10px;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.option-btn a:hover,
-.option-btn a.active {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fffce4;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.nav-links {
+  display: flex;
+  height: 100%;
+  gap: 4px;
+}
+
+.nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  color: #7c7c6f;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-links a:hover {
+  color: #fffce4;
+}
+
+.nav-links a.active {
   color: #abff84;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-bottom-color: #abff84;
+}
+
+.nav-links a:focus-visible,
+.brand:focus-visible {
+  outline: 2px solid #abff84;
+  outline-offset: -2px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e5484d;
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
+@media (max-width: 480px) {
+  .brand span { display: none; }
+  .nav-links a { padding: 0 10px; }
 }
 
 .content{

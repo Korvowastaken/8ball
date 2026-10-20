@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import MatchList from './MatchList';
-import { logMatches } from './matchHelpers';
 import '../styles/live.css';
 
 // matches the API's 60s edge cache
@@ -21,7 +20,6 @@ function LiveMatches() {
         })
         .then((data) => {
           const matches = Array.isArray(data?.matches) ? data.matches : [];
-          logMatches('live', data?.source, matches);
           setLiveMatches(matches);
           setError('');
         })
