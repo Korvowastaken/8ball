@@ -121,6 +121,15 @@
   min-width: 0;
 }
 
+/* a column with no sections (e.g. no timeline/lineups before kick-off) would leave the other one off-centre */
+.md-col:empty {
+  display: none;
+}
+
+.md-grid:has(> .md-col:empty) {
+  grid-template-columns: 1fr;
+}
+
 .md-card {
   background: #111;
   border-radius: 12px;
