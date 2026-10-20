@@ -31,8 +31,15 @@ function App() {
         </Routes>
       </div>
 
-      <footer>
-        <p>made by Robel</p>
+      <footer className="site-footer">
+        <p>
+          Made by{' '}
+          <a href="https://robe1dev.vercel.app/" target="_blank" rel="noopener noreferrer">
+            Robel Yakob ↗
+          </a>
+          <span aria-hidden="true"> · </span>
+          Data from ESPN
+        </p>
       </footer>
     </Router>
   );

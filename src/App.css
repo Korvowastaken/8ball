@@ -129,19 +129,24 @@ body {
 }
 
 
-footer {
-  text-align: center;
-  padding: 2rem 1rem;
-  background-color: #0e100f;
-  border-top: 2px solid #fffce4;
-  color: #7c7c6f;
+.site-footer {
   margin-top: 2rem;
+  padding: 16px;
+  border-top: 1px solid #242526;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #7c7c6f;
 }
 
-footer p {
-  margin: 0;
-  font-size: 1.2rem;
+.site-footer a {
   color: #fffce4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
+  color: #abff84;
 }
 
 main {
@@ -156,10 +161,6 @@ main {
     padding: 0.5rem;
   }
 
-  footer {
-    padding: 1.5rem 0.5rem;
-    font-size: 0.85rem;
-  }
 }
 
 /* Tablet */
