@@ -1,12 +1,17 @@
 
+.match-item {
+  width: 90%;
+}
+
 .match-card{
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 12px;
+  color: inherit;
+  text-decoration: none;
   background-color: #abff84;
   padding: 16px 10px;
-  width: 90%;
   border-radius: 12px;
   margin-bottom: 1.2rem;
 }

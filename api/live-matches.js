@@ -1,59 +1,43 @@
-export default async function handler(req, res) {
-  const allowedOrigins = [
-    'https://sport-data.vercel.app',
-    'http://localhost:5173' // For local dev
-  ];
-  
-  const origin = req.headers.origin;
-  const allowedOrigin = allowedOrigins.includes(origin) ? origin : '';
+import * as espn from './_espn.js';
+import * as footballData from './_footballData.js';
 
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(200).end();
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_DAYS = 10;
+
+function daysBetween(from, to) {
+  const days = [];
+  const end = new Date(`${to}T00:00:00Z`);
+  for (let d = new Date(`${from}T00:00:00Z`); d <= end && days.length <= MAX_DAYS; d.setUTCDate(d.getUTCDate() + 1)) {
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+// GET ?status=LIVE, or ?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD
+export default async function handler(req, res) {
+  const { dateFrom, dateTo, status } = req.query;
+  const live = status === 'LIVE';
+  const days = live ? [] : DAY.test(dateFrom ?? '') && DAY.test(dateTo ?? '') ? daysBetween(dateFrom, dateTo) : [];
+
+  if (!live && (days.length === 0 || days.length > MAX_DAYS)) {
+    return res.status(400).json({ error: `Pass status=LIVE, or dateFrom and dateTo (YYYY-MM-DD, up to ${MAX_DAYS} days)` });
   }
 
   try {
-    const { dateFrom, dateTo, status } = req.query;
-    let url = 'https://api.football-data.org/v4/matches';
-    
-    // Add query parameters if they exist
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    if (status) params.append('status', status);
-    
-    const queryString = params.toString();
-    if (queryString) {
-      url += `?${queryString}`;
+    let source = 'espn';
+    let matches;
+    try {
+      matches = await espn.listMatches({ live, days });
+    } catch (err) {
+      console.error('ESPN failed, falling back to football-data:', err);
+      source = 'football-data';
+      matches = await footballData.listMatches({ live, dateFrom, dateTo });
     }
 
-    const response = await fetch(url, {
-      headers: {
-        'X-Auth-Token': process.env.FOOTBALL_DATA_API_KEY,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Football data API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    // Set CORS headers for the actual response
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=60');
-    
-    return res.status(200).json(data);
+    return res.status(200).json({ source, matches });
   } catch (err) {
     console.error('Error in live-matches API:', err);
-    return res.status(500).json({ 
-      error: 'Failed to fetch matches',
-      details: err.message 
-    });
+    return res.status(err.status ?? 500).json({ error: 'Failed to fetch matches', details: err.message });
   }
 }

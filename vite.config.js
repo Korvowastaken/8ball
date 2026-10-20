@@ -1,61 +1,48 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), 'VITE_')
-  
+// Runs the Vercel functions in api/ during `vite dev`, with a minimal req.query / res.status().json() shim.
+function apiRoutes(env) {
   return {
+    name: 'api-routes',
+    configureServer(server) {
+      const key = env.FOOTBALL_DATA_API_KEY || env.VITE_FOOTBALL_DATA_API_KEY;
+      if (key) process.env.FOOTBALL_DATA_API_KEY ??= key;
+
+      server.middlewares.use('/api', async (req, res, next) => {
+        const url = new URL(req.url, 'http://localhost');
+        const name = url.pathname.slice(1);
+        // only public routes; _-prefixed modules are helpers
+        if (!/^[a-z-]+$/.test(name)) return next();
+        try {
+          const { default: handler } = await server.ssrLoadModule(`/api/${name}.js`);
+          req.query = Object.fromEntries(url.searchParams);
+          res.status = (code) => {
+            res.statusCode = code;
+            return res;
+          };
+          res.json = (body) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(body));
+            return res;
+          };
+          await handler(req, res);
+        } catch (err) {
+          next(err);
+        }
+      });
+    },
+  };
+}
+
+// https://vite.dev/config/
+export default defineConfig(({ mode }) => ({
   plugins: [
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
       },
     }),
+    apiRoutes(loadEnv(mode, process.cwd(), '')),
   ],
-  server: {
-    proxy: {
-      '/api/live-matches': {
-        target: 'https://api.football-data.org/v4',
-        changeOrigin: true,
-        rewrite: (path) => '/matches' + path.replace(/^\/api\/live-matches/, ''),
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            const apiKey = env.VITE_FOOTBALL_DATA_API_KEY;
-            console.log('Using API Key:', apiKey ? 'present' : 'missing');
-            console.log('API Key value:', apiKey);
-            console.log('API Key length:', apiKey?.length);
-            if (apiKey) {
-              proxyReq.setHeader('X-Auth-Token', apiKey);
-            }
-          });
-        },
-        secure: true,
-      },
-      '/api/match-details': {
-        target: 'https://api.football-data.org/v4',
-        changeOrigin: true,
-        rewrite: (path) => {
-          const matchId = new URL('http://localhost' + path).searchParams.get('id');
-          return `/matches/${matchId}`;
-        },
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            const apiKey = env.VITE_FOOTBALL_DATA_API_KEY;
-            if (apiKey) {
-              proxyReq.setHeader('X-Auth-Token', apiKey);
-            }
-          });
-        },
-        secure: true,
-      },
-      '/api/football-data': {
-        target: 'https://api.football-data.org/v4',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/football-data/, ''),
-        secure: true,
-      },
-    },
-  },
-  }
-})
+}))

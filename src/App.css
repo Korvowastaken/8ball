@@ -24,7 +24,11 @@ body {
   padding: 0.75rem;
 }
 
-.option-btn button {
+.option-btn a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   background-color: #0e100f;
   border: 2px solid #7c7c6f;
   color: #7c7c6f;
@@ -35,8 +39,8 @@ body {
   border-radius: 10px;
 }
 
-.option-btn button:hover {
-  
+.option-btn a:hover,
+.option-btn a.active {
   color: #abff84;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
