@@ -114,22 +114,10 @@ body {
     color: #fffce4;
 }
 
-#matches-list {
+.result {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.5rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  list-style: none;
-  padding-left: 0;
-}
-
-#matches-list > .league-header{
-  background-color: auto;
 }
 
 

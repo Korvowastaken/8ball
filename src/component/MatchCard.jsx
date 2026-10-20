@@ -1,36 +1,36 @@
 import { Link } from 'react-router-dom';
-import { CREST_FALLBACK, onCrestError, statusText } from './matchHelpers';
+import { CREST_FALLBACK, onCrestError, isLive, statusText } from './matchHelpers';
 import '../styles/MatchCard.css';
 
-function Team({ className, team, score }) {
+function Team({ team, score, winner }) {
   return (
-    <div className={className}>
+    <div className={`match-team${winner ? ' winner' : ''}`}>
       <img
         src={team?.crest || CREST_FALLBACK}
-        alt={team?.name}
+        alt=""
         loading="lazy"
-        width="40"
-        height="40"
-        style={{ backgroundColor: '#f0f0f0' }}
+        width="24"
+        height="24"
         onError={onCrestError}
       />
-      <p className='team-name'>{team?.name}</p>
-      <p className='team-score'>{score}</p>
+      <span className="team-name">{team?.name}</span>
+      <span className="team-score">{score}</span>
     </div>
   );
 }
 
 function MatchCard({ item }) {
   // fullTime holds the running score while a match is live; null before kick-off
-  const score = item.score?.fullTime ?? {};
+  const { home, away } = item.score?.fullTime ?? {};
+  const finished = item.status === 'FINISHED';
 
   return (
     <li className="match-item">
-      <Link to={`/match/${item.id}`} className="match-card">
-        <Team className="home-team" team={item.homeTeam} score={score.home ?? '-'} />
-        <Team className="away-team" team={item.awayTeam} score={score.away ?? '-'} />
-        <div className="status">
-          <p>{statusText(item)}</p>
+      <Link to={`/match/${item.id}`} className={`match-card${isLive(item) ? ' live' : ''}`}>
+        <span className="match-status">{statusText(item)}</span>
+        <div className="match-teams">
+          <Team team={item.homeTeam} score={home} winner={finished && home > away} />
+          <Team team={item.awayTeam} score={away} winner={finished && away > home} />
         </div>
       </Link>
     </li>

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import MatchList from './MatchList';
 import '../styles/fixture.css'
 
 // local calendar day, not UTC
 const toDay = (date) => format(date, 'yyyy-MM-dd');
+const RELATIVE_DAYS = { '-1': 'Yesterday', 0: 'Today', 1: 'Tomorrow' };
 
 function Fixture() {
   const [selectedDate, setSelectedDate] = useState(() => toDay(new Date()));
@@ -38,18 +39,34 @@ function Fixture() {
   }, [selectedDate]);
 
   const { fixtures, error } = result;
+  const day = parseISO(selectedDate);
+  const offset = differenceInCalendarDays(day, new Date());
+  const shift = (n) => setSelectedDate(toDay(addDays(day, n)));
 
   return (
     <>
-      <div className="search">
-        <input
-          className='srch-input'
-          type="date"
-          aria-label="Match date"
-          value={selectedDate}
-          // clearing the input gives '', which isn't a date
-          onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
-        />
+      <div className="day-bar">
+        <h1 className="day-title">
+          {RELATIVE_DAYS[offset] ?? format(day, 'EEEE')}
+          <small>{format(day, 'd MMMM yyyy')}</small>
+        </h1>
+        <div className="day-nav">
+          <button type="button" onClick={() => shift(-1)} aria-label="Previous day">‹</button>
+          <input
+            className='srch-input'
+            type="date"
+            aria-label="Match date"
+            value={selectedDate}
+            // clearing the input gives '', which isn't a date
+            onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+          />
+          <button type="button" onClick={() => shift(1)} aria-label="Next day">›</button>
+        </div>
+        {offset !== 0 && (
+          <button type="button" className="today-button" onClick={() => setSelectedDate(toDay(new Date()))}>
+            Back to today
+          </button>
+        )}
       </div>
       <div className='result'>
         {loading ? (
@@ -60,7 +77,7 @@ function Fixture() {
           <p className='hitStat'>No fixtures found for this date.</p>
         ) : (
           <>
-            <p className='hitStat'>Found {fixtures.length} major league matches</p>
+            <p className='match-count'>{fixtures.length} match{fixtures.length !== 1 ? 'es' : ''}</p>
             <MatchList matches={fixtures} />
           </>
         )}

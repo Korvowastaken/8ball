@@ -14,6 +14,7 @@ function MatchList({ matches }) {
         <React.Fragment key={match.id ?? match.utcDate}>
           {(i === 0 || leagueOf(match) !== leagueOf(sorted[i - 1])) && (
             <li className="league-header">
+              {match.competition?.emblem && <img src={match.competition.emblem} alt="" width="22" height="22" />}
               <h2>{leagueOf(match)}</h2>
             </li>
           )}

@@ -1,15 +1,79 @@
-.search{
-    margin: 12px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.day-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px 8px;
 }
-.search > button{
-    min-width: 200px;
-    padding: 0.3rem 0.6rem;
-    border-radius: 24px;
-    border: none;
+
+.day-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #fffce4;
+  font-size: 1.6rem;
+  font-weight: 800;
 }
+
+.day-title small {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7c7c6f;
+}
+
+.day-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-nav button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #3a3b3c;
+  border-radius: 8px;
+  background: #111;
+  color: #fffce4;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.day-nav button:hover {
+  border-color: #abff84;
+  color: #abff84;
+}
+
+.day-nav button:focus-visible,
+.today-button:focus-visible {
+  outline: 2px solid #abff84;
+  outline-offset: 2px;
+}
+
+.today-button {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #abff84;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.today-button:hover {
+  text-decoration: underline;
+}
+
+.match-count {
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  color: #7c7c6f;
+}
+
 .srch-input {
   /* makes the browser's own calendar popup dark; accent-color tints it where supported */
   color-scheme: dark;
@@ -17,7 +81,8 @@
   background-color: #111;
   font-family: inherit;
   font-size: 14px;
-  padding: 10px 12px;
+  height: 40px;
+  padding: 0 8px 0 12px;
   border: 1px solid #3a3b3c;
   border-radius: 8px;
   color: #fffce4;
@@ -47,29 +112,4 @@
 
 .srch-input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
-}
-
-.srch-input[type="date"] {
-  padding-right: 8px;
-}
-
-.result{
-  box-sizing: calc(100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-#matches-list{
-  display: flex;
-  flex-direction: column;
-}
-.league-header{
-  width: 90%;
-  border-bottom: 2px solid #fffce4;
-  align-self: left;
-  font-size: 1rem;
-  color: #fffce4;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
 }
